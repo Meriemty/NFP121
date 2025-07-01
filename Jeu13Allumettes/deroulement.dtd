@@ -1,0 +1,8 @@
+<!ELEMENT deroulement (coup*, fin)>
+<!ELEMENT coup EMPTY>
+<!ATTLIST coup numero CDATA #REQUIRED>
+<!ATTLIST coup joueur CDATA #REQUIRED>
+<!ATTLIST coup prise CDATA #REQUIRED>
+<!ELEMENT fin EMPTY>
+<!ATTLIST fin gagnant CDATA #IMPLIED>
+<!ATTLIST fin tricheur CDATA #IMPLIED> 
