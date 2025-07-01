@@ -1,11 +1,11 @@
 package allumettes;
 
-/** Exception levée quand une opération est interdite.
+/** Exception levÃ©e quand une opÃ©ration est interdite.
  * @author Meriem El Air
  * @version 1
  */
 public class OperationInterditeException extends RuntimeException {
-    /** Numéro de version pour la sérialisation. */
+    /** NumÃ©ro de version pour la sÃ©rialisation. */
     private static final long serialVersionUID = 1L;
     
     /** Constructeur de l'exception.

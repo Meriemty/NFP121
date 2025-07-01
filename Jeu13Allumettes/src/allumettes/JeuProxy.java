@@ -1,14 +1,14 @@
 package allumettes;
 
 public class JeuProxy implements Jeu {
-    /** Le jeu réel. */
+    /** Le jeu rÃ©el. */
     private Jeu jeu;
     
     /** Le joueur qui utilise ce proxy. */
     private Joueur joueur;
     
     /** Constructeur du proxy.
-     * @param jeu le jeu réel
+     * @param jeu le jeu rÃ©el
      * @param joueur le joueur qui utilise ce proxy
      */
     public JeuProxy(Jeu jeu, Joueur joueur) {
@@ -24,7 +24,7 @@ public class JeuProxy implements Jeu {
     @Override
     public void retirer(int prise) throws CoupInvalideException {
         throw new OperationInterditeException(
-            "Triche : " + this.joueur.getNom() + " a tenté de tricher !");
+            "Triche : " + this.joueur.getNom() + " a tente de tricher !");
     }
     
     @Override

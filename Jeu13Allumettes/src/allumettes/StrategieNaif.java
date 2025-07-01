@@ -7,8 +7,10 @@ public class StrategieNaif implements Strategie {
     
     @Override
     public int getPrise(Jeu jeu) {
-        int nbAllumettes = jeu.getNombreAllumettes();
-        int max = Math.min(Jeu.PRISE_MAX, nbAllumettes);
+        int max = Math.min(Jeu.PRISE_MAX, jeu.getNombreAllumettes());
         return random.nextInt(max) + 1;
     }
+
+    @Override
+    public String toString() { return "naif"; }
 } 

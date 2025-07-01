@@ -10,8 +10,8 @@ package allumettes;
 public class Jouer {
 
 	/**
-	 * Lancer une partie. En argument sont donnés les deux joueurs sous la forme
-	 * nomstratégie.
+	 * Lancer une partie. En argument sont donnÃ©s les deux joueurs sous la forme
+	 * nomstratÃ©gie.
 	 * 
 	 * @param args la description des deux joueurs
 	 */
@@ -66,15 +66,19 @@ public class Jouer {
 				return new StrategieExpert();
 			case "tricheur":
 				return new StrategieTricheur();
+			case "supertricheur":
+				return new StartegieSuperTricheur();
+			case "swing":
+				return new StrategieHumainSwing();
 			default:
 				throw new ConfigurationException("Strategie inconnue : " + nom);
 		}
 	}
 
-	/** Afficher des indications sur la manière d'exécuter cette classe. */
+	/** Afficher des indications sur la maniÃ¨re d'exÃ©cuter cette classe. */
 	public static void afficherUsage() {
 		System.out.println("Usage : java allumettes.Jouer [-confiant] joueur1@strategie1 joueur2@strategie2");
-		System.out.println("Strategies disponibles : humain, naif, rapide, expert, tricheur");
+		System.out.println("Strategies disponibles : humain, naif, rapide, expert, tricheur, supertricheur, swing");
 	}
 
 }

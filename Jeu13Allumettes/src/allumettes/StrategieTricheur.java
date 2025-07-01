@@ -1,16 +1,21 @@
 package allumettes;
 
 public class StrategieTricheur implements Strategie {
-    /** Constructeur de la stratégie tricheur. */
+    /** Constructeur de la stratÃ©gie tricheur. */
     public StrategieTricheur() {
     }
     
     @Override
     public int getPrise(Jeu jeu) {
-        // Le tricheur retire toutes les allumettes sauf 2
-        int nbAllumettes = jeu.getNombreAllumettes();
-        if (nbAllumettes > 2) {
-            return nbAllumettes - 2;
+        int nb = jeu.getNombreAllumettes();
+        if (nb > 2) {
+            try {
+                jeu.retirer(nb - 2); // triche !
+                System.out.println("[Je triche...]");
+            } catch (CoupInvalideException e) {
+                // Ne devrait jamais arriver
+            }
+            return 1;
         } else {
             return 1;
         }

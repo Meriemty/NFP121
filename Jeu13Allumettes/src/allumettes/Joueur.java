@@ -4,12 +4,12 @@ public class Joueur {
 	/** Le nom du joueur. */
 	private String nom;
 	
-	/** La stratégie du joueur. */
+	/** La stratÃ©gie du joueur. */
 	private Strategie strategie;
 	
 	/** Constructeur d'un joueur.
 	 * @param nom le nom du joueur
-	 * @param strategie la stratégie du joueur
+	 * @param strategie la stratÃ©gie du joueur
 	 */
 	public Joueur(String nom, Strategie strategie) {
 		this.nom = nom;
@@ -20,7 +20,7 @@ public class Joueur {
 	 * @return le nom du joueur
 	 */
 	public String getNom() {
-		return this.nom;
+		return nom;
 	}
 	
 	/** Obtenir le nombre d'allumettes que le joueur veut prendre.
@@ -28,13 +28,13 @@ public class Joueur {
 	 * @return le nombre d'allumettes Ã  prendre
 	 */
 	public int getPrise(Jeu jeu) {
-		return this.strategie.getPrise(jeu);
+		return strategie.getPrise(jeu);
 	}
 	
-	/** Obtenir la stratégie du joueur.
-	 * @return la stratégie du joueur
+	/** Obtenir la stratÃ©gie du joueur.
+	 * @return la stratÃ©gie du joueur
 	 */
 	public Strategie getStrategie() {
-		return this.strategie;
+		return strategie;
 	}
 }

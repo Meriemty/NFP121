@@ -4,197 +4,132 @@ import java.awt.*;
 import javax.swing.*;
 
 public class InterfaceSwing extends JFrame {
-    /** Numèro de version pour la sérialisation. */
     private static final long serialVersionUID = 1L;
 
     private JButton[] boutons;
-    private JTextArea messageArea;
+    private JButton boutonTricher;
+    private JTextField champTriche;
     private JLabel labelAllumettes;
-    private Jeu jeu;
-    private Joueur joueurOrdinateur;
-    private String nomJoueur;
-    
-    public InterfaceSwing() {
-        super("Jeu des 13 allumettes");
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setLayout(new BorderLayout());
-        
-        // Demander le nom du joueur
-        this.nomJoueur = JOptionPane.showInputDialog(this,
-            "Entrez votre nom :",
-            "Nom du joueur",
-            JOptionPane.QUESTION_MESSAGE);
-        if (this.nomJoueur == null || this.nomJoueur.trim().isEmpty()) {
-            this.nomJoueur = "Joueur";
-        }
-        
-        // Création du jeu
-        this.jeu = new JeuAllumettes(13);
-        
-        // Sélection de la stratégie de l'ordinateur
-        Strategie strategieOrdi = choisirStrategie();
-        this.joueurOrdinateur = new Joueur("Ordinateur", strategieOrdi);
-        
-        // Panel principal
+    private final Object verrou;
+    private int choix;
+    private boolean triche;
+    private int nbTriche;
+    private boolean choixFait;
+
+    public InterfaceSwing(String nomJoueur, int nbAllumettes, Object verrou) {
+        super(nomJoueur + " ?");
+        this.verrou = verrou;
+        this.choix = 0;
+        this.triche = false;
+        this.nbTriche = 1;
+        this.choixFait = false;
+        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+        // Panel principal vertical
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-        
-        // Label pour afficher le nombre d'allumettes
-        labelAllumettes = new JLabel("Allumettes restantes : 13");
+
+        // Label nombre d'allumettes (gros, centré)
+        labelAllumettes = new JLabel(String.valueOf(nbAllumettes));
+        labelAllumettes.setFont(new Font("Arial", Font.BOLD, 48));
         labelAllumettes.setAlignmentX(Component.CENTER_ALIGNMENT);
-        labelAllumettes.setFont(new Font("Arial", Font.BOLD, 16));
+        mainPanel.add(Box.createVerticalStrut(10));
         mainPanel.add(labelAllumettes);
-        mainPanel.add(Box.createVerticalStrut(20));
-        
-        // Zone de texte pour les messages
-        messageArea = new JTextArea(10, 30);
-        messageArea.setEditable(false);
-        messageArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
-        JScrollPane scrollPane = new JScrollPane(messageArea);
-        scrollPane.setAlignmentX(Component.CENTER_ALIGNMENT);
-        mainPanel.add(scrollPane);
-        mainPanel.add(Box.createVerticalStrut(20));
-        
-        // Panel pour les boutons
-        JPanel buttonPanel = new JPanel();
+        mainPanel.add(Box.createVerticalStrut(10));
+
+        // Panel horizontal pour tricher + champ
+        JPanel trichePanel = new JPanel();
+        trichePanel.setLayout(new BoxLayout(trichePanel, BoxLayout.X_AXIS));
+        boutonTricher = new JButton("tricher");
+        boutonTricher.setFocusable(false);
+        boutonTricher.addActionListener(e -> {
+            synchronized (verrou) {
+                triche = true;
+                try {
+                    nbTriche = Integer.parseInt(champTriche.getText());
+                } catch (NumberFormatException ex) {
+                    nbTriche = 1;
+                }
+                choixFait = true;
+                verrou.notify();
+            }
+        });
+        champTriche = new JTextField("1", 2);
+        trichePanel.add(boutonTricher);
+        trichePanel.add(Box.createHorizontalStrut(5));
+        trichePanel.add(champTriche);
+        trichePanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        mainPanel.add(trichePanel);
+        mainPanel.add(Box.createVerticalStrut(10));
+
+        // Panel horizontal pour les boutons 1, 2, 3
+        JPanel boutonsPanel = new JPanel();
+        boutonsPanel.setLayout(new BoxLayout(boutonsPanel, BoxLayout.X_AXIS));
         boutons = new JButton[3];
         for (int i = 0; i < 3; i++) {
             boutons[i] = new JButton(String.valueOf(i + 1));
-            final int nbAllumettes = i + 1;
-            boutons[i].addActionListener(e -> jouerCoup(nbAllumettes));
-            buttonPanel.add(boutons[i]);
-        }
-        buttonPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        mainPanel.add(buttonPanel);
-        
-        this.add(mainPanel);
-        this.pack();
-        this.setLocationRelativeTo(null);
-        
-        // Message initial
-        afficherMessage("Allumettes restantes : 13");
-        afficherMessage(nomJoueur + ", combien d'allumettes ?");
-    }
-    
-    private void afficherMessage(String message) {
-        messageArea.append(message + "\n");
-        messageArea.setCaretPosition(messageArea.getDocument().getLength());
-    }
-    
-    private Strategie choisirStrategie() {
-        String[] options = {"Rapide", "Naif", "Expert"};
-        int choix = JOptionPane.showOptionDialog(this,
-            "Choisissez le niveau de l'ordinateur :",
-            "Niveau de l'ordinateur",
-            JOptionPane.DEFAULT_OPTION,
-            JOptionPane.QUESTION_MESSAGE,
-            null,
-            options,
-            options[0]);
-            
-        switch (choix) {
-            case 0:
-                return new StrategieRapide();
-            case 1:
-                return new StrategieNaif();
-            case 2:
-                return new StrategieExpert();
-            default:
-                return new StrategieExpert(); // Par défaut, on utilise la stratégie expert
-        }
-    }
-    
-    private void jouerCoup(int nbAllumettes) {
-        try {
-            // Tour du joueur humain
-            afficherMessage(nomJoueur + " prend " + nbAllumettes + " allumette" + (nbAllumettes > 1 ? "s" : "") + ".");
-            jeu.retirer(nbAllumettes);
-            updateInterface();
-            
-            if (jeu.getNombreAllumettes() == 0) {
-                finDePartie(nomJoueur + " perd !");
-                return;
-            }
-            
-            // Tour de l'ordinateur
-            desactiverBoutons();
-            SwingUtilities.invokeLater(() -> {
-                try {
-                    Thread.sleep(1000); // Pause pour effet visuel
-                    int priseOrdi = joueurOrdinateur.getPrise(jeu);
-                    afficherMessage("Ordinateur prend " + priseOrdi + " allumette" + (priseOrdi > 1 ? "s" : "") + ".");
-                    jeu.retirer(priseOrdi);
-                    updateInterface();
-                    
-                    if (jeu.getNombreAllumettes() == 0) {
-                        finDePartie("Ordinateur perd !");
-                        afficherMessage(nomJoueur + " gagne !");
-                    } else {
-                        activerBoutons();
-                        afficherMessage(nomJoueur + ", combien d'allumettes ?");
-                    }
-                } catch (Exception e) {
-                    afficherMessage("Impossible ! " + e.getMessage());
-                    activerBoutons();
+            boutons[i].setFocusable(false);
+            final int nb = i + 1;
+            boutons[i].addActionListener(e -> {
+                synchronized (verrou) {
+                    choix = nb;
+                    choixFait = true;
+                    verrou.notify();
                 }
             });
-        } catch (CoupInvalideException e) {
-            afficherMessage("Impossible ! " + e.getMessage());
+            boutonsPanel.add(boutons[i]);
+            if (i < 2) boutonsPanel.add(Box.createHorizontalStrut(10));
         }
+        boutonsPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        mainPanel.add(boutonsPanel);
+
+        this.setContentPane(mainPanel);
+        this.pack();
+        this.setResizable(false);
+        this.setLocationRelativeTo(null);
     }
-    
-    private void updateInterface() {
-        String message = "Allumettes restantes : " + jeu.getNombreAllumettes();
-        labelAllumettes.setText(message);
-        afficherMessage(message);
-        for (JButton bouton : boutons) {
-            int nb = Integer.parseInt(bouton.getText());
-            bouton.setEnabled(nb <= jeu.getNombreAllumettes());
+
+    public void afficher(int nbAllumettes, String message) {
+        labelAllumettes.setText(String.valueOf(nbAllumettes));
+        for (int i = 0; i < 3; i++) {
+            boutons[i].setEnabled((i + 1) <= nbAllumettes);
         }
+        boutonTricher.setEnabled(nbAllumettes > 1 || nbAllumettes == 1);
+        champTriche.setEnabled(nbAllumettes > 1);
     }
-    
-    private void desactiverBoutons() {
-        for (JButton bouton : boutons) {
-            bouton.setEnabled(false);
-        }
-    }
-    
-    private void activerBoutons() {
-        updateInterface();
-    }
-    
-    private void finDePartie(String message) {
-        afficherMessage(message);
-        desactiverBoutons();
-        
-        // Proposer une nouvelle partie
-        SwingUtilities.invokeLater(() -> {
-            int choix = JOptionPane.showConfirmDialog(this,
-                "Voulez-vous faire une nouvelle partie ?",
-                "Fin de partie",
-                JOptionPane.YES_NO_OPTION);
-            if (choix == JOptionPane.YES_OPTION) {
-                nouvellePartie();
-            } else {
-                dispose();
+
+    public int attendreChoix() {
+        choix = 0;
+        triche = false;
+        choixFait = false;
+        setVisible(true);
+        synchronized (verrou) {
+            while (!choixFait) {
+                try {
+                    verrou.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
             }
-        });
+        }
+        return choix;
     }
-    
-    private void nouvellePartie() {
-        this.jeu = new JeuAllumettes(13);
-        // Permettre de changer la stratégie de l'ordinateur
-        Strategie strategieOrdi = choisirStrategie();
-        this.joueurOrdinateur = new Joueur("Ordinateur", strategieOrdi);
-        messageArea.setText(""); // Effacer les messages précédents
-        updateInterface();
-        activerBoutons();
-        afficherMessage(nomJoueur + ", combien d'allumettes ?");
+
+    public boolean aTriche() {
+        return triche;
     }
-    
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new InterfaceSwing().setVisible(true);
-        });
+
+    public int getNbTriche() {
+        return nbTriche;
     }
-} 
+
+    public void reset() {
+        choix = 0;
+        triche = false;
+        choixFait = false;
+    }
+
+    public void fermer() {
+        dispose();
+    }
+}

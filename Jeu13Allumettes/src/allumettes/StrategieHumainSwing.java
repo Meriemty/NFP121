@@ -1,27 +1,46 @@
 package allumettes;
 
 public class StrategieHumainSwing implements Strategie {
-    private int nombreChoisi = -1;
-    private boolean choixFait = false;
-    
+    private static InterfaceSwing interfaceSwing;
+    private static final Object verrou = new Object();
+    private static boolean initialisee = false;
+    private String nomJoueur;
+
+    public StrategieHumainSwing() {
+        this.nomJoueur = "Joueur";
+        initialiserInterface();
+    }
+    public StrategieHumainSwing(String nom) {
+        this.nomJoueur = nom;
+        initialiserInterface();
+    }
+    private void initialiserInterface() {
+        if (!initialisee) {
+            interfaceSwing = new InterfaceSwing(nomJoueur, 13, verrou);
+            initialisee = true;
+        }
+    }
     @Override
     public int getPrise(Jeu jeu) {
-        // Cette méthode ne sera pas utilisée directement
-        // car les choix sont gérés par l'interface graphique
-        return nombreChoisi;
-    }
-    
-    public void setChoix(int nombre) {
-        this.nombreChoisi = nombre;
-        this.choixFait = true;
-    }
-    
-    public boolean isChoixFait() {
-        return choixFait;
-    }
-    
-    public void resetChoix() {
-        this.choixFait = false;
-        this.nombreChoisi = -1;
+        int nbAllumettes = jeu.getNombreAllumettes();
+        interfaceSwing.afficher(nbAllumettes, nomJoueur + ", combien d'allumettes ?");
+        int prise = interfaceSwing.attendreChoix();
+        if (interfaceSwing.aTriche()) {
+            int nbTriche = interfaceSwing.getNbTriche();
+            if (nbAllumettes == 1) {
+                // Ajout d'une allumette (cas spÃ©cial)
+                System.out.println("[Je triche... 1 allumette en plus]");
+            } else {
+                int retire = Math.min(nbTriche, nbAllumettes - 1);
+                try {
+                    jeu.retirer(retire);
+                } catch (Exception e) {}
+                System.out.println("[Je triche... " + retire + (retire > 1 ? " allumettes en moins]" : " allumette en moins]") );
+            }
+            interfaceSwing.reset();
+            return interfaceSwing.attendreChoix();
+        }
+        interfaceSwing.reset();
+        return prise;
     }
 } 
